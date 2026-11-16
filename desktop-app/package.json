@@ -1,0 +1,12 @@
+{
+  "name": "edushield-player",
+  "version": "1.0.0",
+  "description": "EduShield 100% Anti-Record Protected Desktop Player",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.2.1"
+  }
+}

@@ -1,0 +1,439 @@
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">◈</span><div><strong>EduShield</strong><small>SECURITY LAB</small></div></div>
+    <div class="side-label">المختبر الأمني الصارم</div>
+    <a href="#dashboard" class="nav active"><span>◫</span> نظرة عامة</a>
+    <a href="#lecture" class="nav"><span>▷</span> مشغل الفيديو المحمي</a>
+    <a href="#experiments" class="nav"><span>◎</span> دروع الحماية والرصد</a>
+    <a href="#architecture" class="nav"><span>⚙</span> الحماية الجذرية (DRM & Desktop)</a>
+    <a href="#limitations" class="nav"><span>ⓘ</span> حدود المتصفح الهندسية</a>
+    <div class="sidebar-bottom">
+      <span class="live-dot"></span>
+      {{isDesktopApp() ? 'Electron Native Desktop' : 'Web Browser Sandbox'}}
+      <small>Angular + ASP.NET Core</small>
+    </div>
+  </aside>
+
+  <main id="dashboard" class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        المختبر <span>/</span> نظام الحظر الدائم لتسجيل الشاشة والإضافات (Anti-ScreenRecord & Anti-Extension)
+      </div>
+      <div class="top-right">
+        @if (isDesktopApp()) {
+          <span class="pill ok">DESKTOP HARDWARE SHIELD</span>
+        } @else {
+          <span class="pill ok">WEB SENTINEL ACTIVE</span>
+        }
+        <span class="avatar">ES</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="hero-dot"></span> نظام الإغلاق الدائم (Permanent Blackout Engine)</div>
+          <h1>شاشة سوداء دائمة طالما<br><em>التسجيل أو الإضافة تعمل.</em></h1>
+          <p>
+            تطبيق قاعدة الحماية الصارمة: إذا تم تشغيل أي برنامج سكرين ريكورد (OBS / Snipping Tool / Camtasia)
+            أو رصد أي إضافة متصفح (Extension)، تتحول الشاشة إلى سوداء بالكامل <strong>وتبقى سوداء ولا تفتح أبداً حتى يتم إغلاق برنامج التسجيل أو إزالة الإضافة نهائياً</strong>.
+          </p>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-ring ring-1"></div>
+          <div class="hero-ring ring-2"></div>
+          <div class="hero-shield">⌁<span>LOCK</span></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-icon">▣</span>
+          <div>
+            <strong>بيئة التشغيل الحالية</strong>
+            <small>{{isDesktopApp() ? 'تطبيق سطح مكتب (قفل عتادي WDA)' : 'متصفح ويب (رصد الحقن والحافظة)'}}</small>
+          </div>
+          <span class="stat-chip ok">{{isDesktopApp() ? 'Desktop Native' : 'Browser Web'}}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🛡️</span>
+          <div>
+            <strong>حالة برامج السكرين ريكورد</strong>
+            <small>{{isRecorderRunning() ? ('برنامج نشط: ' + activeRecorderName()) : 'لا توجد برامج تسجيل نشطة'}}</small>
+          </div>
+          <span class="stat-chip" [class.danger]="isRecorderRunning()" [class.ok]="!isRecorderRunning()">
+            {{isRecorderRunning() ? 'RECORDER DETECTED' : 'CLEAR'}}
+          </span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">◇</span>
+          <div>
+            <strong>حالة إضافات المتصفح</strong>
+            <small>{{isExtensionRunning() ? 'تم رصد إضافة متصفح محظورة' : 'خالٍ من الإضافات المحظورة'}}</small>
+          </div>
+          <span class="stat-chip" [class.danger]="isExtensionRunning()" [class.ok]="!isExtensionRunning()">
+            {{isExtensionRunning() ? 'EXTENSION BLOCKED' : 'NO EXTENSIONS'}}
+          </span>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <!-- Lesson Player Card -->
+        <section class="card player-card" id="lecture">
+          <div class="card-heading">
+            <div>
+              <div class="mini-label">PROTECTED LESSON PLAYER</div>
+              <h2>المشغل التعليمي المحمي</h2>
+            </div>
+            <span class="tag">{{useBlobProtection() ? 'BLOB MEMORY' : 'SECURE STREAM'}}</span>
+          </div>
+
+          @if (currentUser()) {
+            <div class="video-container" (contextmenu)="disableContextMenu($event)" (dragstart)="$event.preventDefault()">
+              <video
+                #videoEl
+                [src]="activeVideoSrc()"
+                controls
+                playsinline
+                preload="metadata"
+                controlsList="nodownload noplaybackrate"
+                disablePictureInPicture
+                (contextmenu)="disableContextMenu($event)"
+                (error)="onVideoError($event)"
+              ></video>
+
+              @if (videoErrorMessage()) {
+                <div class="privacy-cover" style="background: rgba(15, 6, 8, 0.95); z-index: 10;">
+                  <span class="lock-shape" style="color: #ff4757;">⚠️</span>
+                  <strong style="color: #ff6b81;">تعذر تشغيل الفيديو</strong>
+                  <small style="color: #d2dae2;">{{videoErrorMessage()}}</small>
+                  <button class="primary" style="margin-top: 10px;" (click)="videoErrorMessage.set(null); login()">إعادة المحاولة</button>
+                </div>
+              }
+
+              <!-- Dynamic Floating Watermark -->
+              <div class="watermark" [style.top.%]="watermarkY()" [style.left.%]="watermarkX()">
+                🔒 {{currentUser()}} · IP: 127.0.0.1 · جلسة: LAB-2026 · {{clock()}}
+              </div>
+
+              <!-- Privacy Cover on window blur -->
+              @if (contentHidden() && !blackoutActive()) {
+                <div class="privacy-cover">
+                  <span class="lock-shape">⊘</span>
+                  <strong>المحتوى مخفي مؤقتًا</strong>
+                  <small>فقدت الصفحة التركيز — تم حجب الفيديو</small>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="locked-video">
+              <div class="lock-symbol">⌑</div>
+              <strong>المحاضرة محمية بنظام التحقق والجلسات</strong>
+              <p>سجّل دخولك بالحساب التجريبي أدناه لتفعيل المشغل ودروع الحماية.</p>
+              <span class="hint-code">HTTP 401 Unauthorized بدون جلسة صالحة</span>
+            </div>
+          }
+
+          <div class="card-footer">
+            <div class="avatar small">🛡️</div>
+            <div class="lesson-desc">
+              <strong>فيديو الحماية التدريبي الصارم</strong>
+              <span>
+                قفل الشاشة السوداء تلقائياً طوال فترة عمل السكرين ريكورد أو وجود إضافات بالمتصفح.
+              </span>
+            </div>
+            <span class="mini-badge">{{useBlobProtection() ? 'Blob' : 'MP4'}}</span>
+          </div>
+        </section>
+
+        <!-- Authentication Card -->
+        <section class="card login-card">
+          <div class="card-heading">
+            <div>
+              <div class="mini-label">AUTHENTICATION & SESSION</div>
+              <h2>جلسة الوصول للدرس</h2>
+            </div>
+            <span class="status" [class.signed-in]="currentUser()">
+              {{currentUser() ? 'تم تسجيل الدخول' : 'غير مسجّل'}}
+            </span>
+          </div>
+
+          @if (!currentUser()) {
+            <p class="subtle">سجل الدخول بحساب الطالب التجريبي لبدء المحاضرة واختبار دروع الأمان:</p>
+            <label for="demo-username">اسم المستخدم</label>
+            <input id="demo-username" [(ngModel)]="username" autocomplete="username" />
+            <label for="demo-password">كلمة المرور</label>
+            <div class="password-wrap">
+              <input
+                id="demo-password"
+                [type]="showPassword() ? 'text' : 'password'"
+                [(ngModel)]="password"
+                autocomplete="current-password"
+              />
+              <button type="button" class="eye" (click)="showPassword.set(!showPassword())">
+                {{showPassword() ? 'إخفاء' : 'إظهار'}}
+              </button>
+            </div>
+            <button class="primary full" (click)="login()" [disabled]="busy()">
+              {{busy() ? 'جاري التحقق...' : 'الدخول إلى المختبر وتفعيل الحماية'}} <span>←</span>
+            </button>
+            <p class="login-hint">الحساب التجريبي: <code>student</code> | كلمة المرور: <code>LabOnly_2026!</code></p>
+          } @else {
+            <div class="signed-panel">
+              <span class="check-circle">✓</span>
+              <strong>جلسة الطالب نشطة ومحمية</strong>
+              <p>المستخدم الحالي: <code>{{currentUser()}}</code></p>
+              <small style="color:#56c6b7">جلسة مؤمنة بـ HttpOnly Cookies + CSRF Protection</small>
+            </div>
+            <button class="outline full" (click)="logout()" [disabled]="busy()">تسجيل الخروج وإغلاق الجلسة</button>
+            <p class="login-hint">عند تسجيل الخروج يتم تفريغ كائنات الذاكرة وإبطال تصريح الفيديو فوراً.</p>
+          }
+          <div class="notice">
+            <span>ℹ</span>
+            <p>{{note()}}</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Security Controls & Experiments Section -->
+      <section class="card experiments" id="experiments">
+        <div class="card-heading">
+          <div>
+            <div class="mini-label">ACTIVE SECURITY SHIELDS & MATRIX</div>
+            <h2>دروع الحماية الفورية والمصفوفة الأمنية</h2>
+          </div>
+          <span class="tag">PERMANENT LOCK MATRIX</span>
+        </div>
+
+        <div class="experiment-list">
+          @for (test of tests; track test.id) {
+            <div class="experiment">
+              <div
+                class="experiment-dot"
+                [class.orange]="test.kind === 'limited'"
+                [class.red]="test.kind === 'blocked'"
+                [class.purple]="test.kind === 'desktop'"
+              ></div>
+              <div>
+                <strong>{{test.name}}</strong>
+                <p>{{test.summary}}</p>
+              </div>
+              <span
+                class="exp-badge"
+                [class.orange]="test.kind === 'limited'"
+                [class.red]="test.kind === 'blocked'"
+                [class.active]="test.kind === 'active'"
+                [class.desktop]="test.kind === 'desktop'"
+              >
+                {{
+                  test.kind === 'active' ? 'درع برمجي نشط' :
+                  test.kind === 'blocked' ? 'مستحيل في المتصفح' :
+                  test.kind === 'desktop' ? 'حل إنتاجي 100%' : 'حماية جزئية'
+                }}
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- Interactive Shield Controls & Test Simulations -->
+        <div class="experiment-controls">
+          <!-- Simulation 1: Screen Recorder Blackout Test -->
+          <div class="control-unit">
+            <div>
+              <strong>1) اختبار قفل الشاشة السوداء عند تشغيل سكرين ريكورد (Screen Recorder Lock)</strong>
+              <p>
+                يجعل الشاشة سوداء بالكامل 100% ويمنع إغلاقها، وتظل سوداء حتى يتم إيقاف وإغلاق برنامج التسجيل نهائياً.
+              </p>
+            </div>
+            <button
+              class="secondary"
+              [class.danger-btn]="isRecorderRunning()"
+              (click)="toggleRecorderSimulation()"
+            >
+              {{isRecorderRunning() ? 'إيقاف السكرين ريكورد (إلغاء القفل)' : 'محاكاة تشغيل سكرين ريكورد'}}
+            </button>
+          </div>
+
+          <!-- Simulation 2: Extension Blackout Test -->
+          <div class="control-unit">
+            <div>
+              <strong>2) اختبار قفل الشاشة السوداء عند رصد إضافة متصفح (Extension Lock)</strong>
+              <p>
+                يرصد إضافات التنزيل والتقاط الشاشة ويقفل الشاشة باللون الأسود ويمنع استئنافها حتى يتم تعطيل/إزالة الإضافة.
+              </p>
+            </div>
+            <button
+              class="secondary"
+              [class.danger-btn]="isExtensionRunning()"
+              (click)="toggleExtensionSimulation()"
+            >
+              {{isExtensionRunning() ? 'إزالة/تعطيل الإضافة (إلغاء القفل)' : 'محاكاة رصد إضافة متصفح'}}
+            </button>
+          </div>
+
+          <!-- Control 3: Anti-Capture Keyboard Shortcuts & Blackout -->
+          <div class="control-unit">
+            <div>
+              <strong>3) درع الشاشة السوداء الفوري لاختصارات الكيبورد (PrintScreen / Win+Shift+S)</strong>
+              <p>
+                يرصد زر <code>PrintScreen</code> واختصار <code>Win+Shift+S</code> واختصارات <code>F12 / DevTools / Ctrl+S</code>،
+                ويقوم فوراً بقلب كامل الشاشة إلى اللون الأسود وتطهير الحافظة (Clipboard) فور العودة للنافذة.
+              </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button class="secondary" (click)="simulateScreenshotTest()">محاكاة لقطة شاشة</button>
+              <label class="switch">
+                <input type="checkbox" [ngModel]="antiCaptureMode()" (ngModelChange)="setAntiCaptureMode($event)" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Control 4: Window Blur Blackout -->
+          <div class="control-unit">
+            <div>
+              <strong>4) تعتيم الشاشة عند فقدان تركيز النافذة (Window Blur & Tab Switch)</strong>
+              <p>
+                إذا فتح الطالب أداة تسجيل أو تصوير شاشة خارجية (مثل Snipping Tool أو OBS)، تفقد النافذة التركيز وتتحول إلى شاشة سوداء فوراً.
+              </p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" [ngModel]="blurMode()" (ngModelChange)="setBlurMode($event)" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <!-- Control 5: In-Memory Blob Video Protection (Anti-Extension Download) -->
+          <div class="control-unit">
+            <div>
+              <strong>5) حماية تدفق الذاكرة (In-Memory Blob Stream) لمكافحة إضافات التنزيل</strong>
+              <p>
+                يقوم بتحميل الفيديو مشفراً في ذاكرة المتصفح كـ <code>Blob URL</code> مؤقت مع إخفاء مسار <code>.mp4</code> المباشر من الـ DOM،
+                مما يعطل عمل إضافات المتصفح البسيطة التي تبحث عن وسوم الفيديو المباشرة.
+              </p>
+            </div>
+            <button
+              class="secondary"
+              (click)="toggleBlobProtection()"
+              [disabled]="blobLoading() || !currentUser()"
+            >
+              {{blobLoading() ? 'جاري التحميل بالذاكرة...' : (useBlobProtection() ? 'إلغاء حماية الذاكرة' : 'تفعيل حماية الذاكرة (Blob)')}}
+            </button>
+          </div>
+        </div>
+
+        <!-- Security Live Events Log -->
+        @if (securityEvents().length > 0) {
+          <div style="margin-top:20px;">
+            <div class="mini-label">SECURITY INCIDENT MONITOR — سجل الرصد والحظر الحي</div>
+            <div class="events-log">
+              @for (evt of securityEvents(); track $index) {
+                <div class="event-entry">
+                  <span class="event-time">[{{evt.time}}]</span>
+                  <span class="event-msg">{{evt.event}}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Architecture & Production Guide Card -->
+      <section class="card" id="architecture" style="margin-top: 18px;">
+        <div class="card-heading">
+          <div>
+            <div class="mini-label">STRICT ENFORCEMENT ARCHITECTURE</div>
+            <h2>كيف يعمل نظام القفل الدائم (Screen Recorder & Extension Watcher)؟</h2>
+          </div>
+          <span class="tag">HOW IT WORKS</span>
+        </div>
+
+        <div style="color: #cad8e6; font-size: 13px; line-height: 1.9;">
+          <p>
+            لتلبية شرطك الصارم <strong>(أن تظل الشاشة سوداء طالما السكرين ريكورد شغال، وممنوع يكون هناك أي إضافة مشغلة)</strong>:
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 15px 0;">
+            <div style="background: #09121d; border: 1px solid #ff4757; border-radius: 10px; padding: 15px;">
+              <strong style="color: #ff6b81; font-size: 14px; display: block; margin-bottom: 8px;">
+                🎥 درع السكرين ريكورد الدائم
+              </strong>
+              <p style="font-size: 11px; color: #8aa5b9; margin: 0 0 10px 0;">
+                كيف نضمن بقاء الشاشة سوداء حتى يغلق الطالب برنامج التسجيل؟
+              </p>
+              <ul style="font-size: 11px; color: #a5b9cb; padding-right: 18px; margin: 0;">
+                <li>في تطبيق سطح المكتب [start-desktop.bat](file:///c:/Users/sjalk/Downloads/EduShield-Browser-Lab/EduShield-Browser-Lab/start-desktop.bat)، يقوم محرك فحص العمليات بفحص نظام ويندوز كل 1.2 ثانية بحثاً عن (OBS, Camtasia, Bandicam, ShareX, SnippingTool).</li>
+                <li>طالما البرنامج يعمل: تُقفل الشاشة باللون الأسود 100% ويتم إخفاء زر الاستئناف.</li>
+                <li>بمجرد إغلاق البرنامج من قِبل الطالب: يرصد المحرك انتهاء العملية وتعود الشاشة تلقائياً.</li>
+              </ul>
+            </div>
+
+            <div style="background: #09121d; border: 1px solid #ff4757; border-radius: 10px; padding: 15px;">
+              <strong style="color: #ff6b81; font-size: 14px; display: block; margin-bottom: 8px;">
+                🧩 درع حظر الإضافات (Extensions Sentinel)
+              </strong>
+              <p style="font-size: 11px; color: #8aa5b9; margin: 0 0 10px 0;">
+                كيف نمنع الإضافات ونبقي الشاشة سوداء عند رصدها؟
+              </p>
+              <ul style="font-size: 11px; color: #a5b9cb; padding-right: 18px; margin: 0;">
+                <li>في المتصفح: يرصد المحرك حقن كود الإضافات (IDM, Loom, Video Downloaders, chrome-extension://) في الـ DOM وفحص الـ Prototype.</li>
+                <li>عند رصد أي إضافة: تظل الشاشة سوداء بالكامل حتى يقوم الطالب بتعطيل الإضافة.</li>
+                <li>في تطبيق الديسكتوب: الإضافات محظورة ومعدومة 100% من جذورها في إعدادات الجلسة.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        EDUSHIELD ADVANCED SECURITY LAB <span>·</span> ANGULAR 21 + ASP.NET CORE 10 <span>·</span> STRICT PERSISTENT BLACKOUT SYSTEM
+      </footer>
+    </div>
+  </main>
+
+  <!-- Full-Screen Viewport Blackout Overlay (Persistent Lock) -->
+  @if (blackoutActive() && currentUser()) {
+    <div class="full-screen-blackout">
+      <div class="blackout-box" [class.persistent-lock]="isRecorderRunning() || isExtensionRunning()">
+        <span class="blackout-icon">
+          {{(isRecorderRunning() || isExtensionRunning()) ? '⛔' : '🛡️'}}
+        </span>
+        <h3>
+          {{(isRecorderRunning() || isExtensionRunning()) ? 'قفل الحماية الدائم: الشاشة معطلة بالكامل' : 'تم تفعيل درع الحماية الأمني (Blackout Shield)'}}
+        </h3>
+        <div class="blackout-reason">{{blackoutReason()}}</div>
+
+        @if (isRecorderRunning()) {
+          <div class="lock-guidance">
+            <strong>⚠️ تم رصد برنامج تسجيل شاشة نشط: ({{activeRecorderName()}})</strong>
+            <p>
+              يمنع نظام EduShield تشغيل أي برامج لتسجيل أو بث الشاشة.
+              <br>
+              <strong>ستبقى الشاشة سوداء تماماً ولا يمكن استئناف المشاهدة إلا بعد إيقاف وإغلاق برنامج التسجيل نهائياً من جهازك.</strong>
+            </p>
+            <div class="live-checking-pill">
+              <span class="pulse-dot"></span>
+              جاري فحص إغلاق البرنامج تلقائياً كل 1.2 ثانية...
+            </div>
+          </div>
+        } @else if (isExtensionRunning()) {
+          <div class="lock-guidance">
+            <strong>⚠️ تم رصد إضافة متصفح (Extension) نشطة: ({{extensionDetail()}})</strong>
+            <p>
+              يمنع نظام التعليم استخدام أي إضافات لتنزيل الفيديو أو تسجيل الشاشة.
+              <br>
+              <strong>ستبقى الشاشة سوداء ولا يمكن تشغيل الفيديو حتى تقوم بإزالة/تعطيل الإضافة من متصفحك أو استخدام نافذة خالية من الإضافات.</strong>
+            </p>
+          </div>
+        } @else {
+          <p class="blackout-hint">
+            تم حجب كامل محتوى الشاشة وإيقاف تشغيل الفيديو وتطهير الحافظة (Clipboard) لحماية المحتوى من لقطات الشاشة والتسجيل.
+          </p>
+          <button class="primary" (click)="dismissBlackout()">
+            استئناف المشاهدة <span>↩</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

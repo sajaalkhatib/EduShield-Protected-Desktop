@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "edu-shield-web": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/edu-shield-web",
+            "index": "src/index.html",
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": [{"glob": "**/*", "input": "public"}],
+            "styles": ["src/styles.css"]
+          },
+          "configurations": {
+            "production": {"optimization": true, "outputHashing": "all"},
+            "development": {"optimization": false, "sourceMap": true}
+          },
+          "defaultConfiguration": "development"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "edu-shield-web:build:development"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "2813e300-3324-4af2-ad50-54128475ba3d"
+  }
+}

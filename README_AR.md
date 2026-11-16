@@ -1,0 +1,146 @@
+# EduShield — Browser Security Lab
+
+**مختبر عملي للتدريب على حماية محتوى منصة تعليمية داخل المتصفح**
+
+**التقنيات:** ASP.NET Core 10 Web API (C#) + Angular 21 (TypeScript) + Video sample MP4.
+
+> مهم: لا يوجد في المشروع DRM، ولا يمكنه منع Screenshots أو Screen Recording أو الكشف الشامل عن Extensions. هدف المختبر هو تجربة إجراءات الحماية المحدودة وإثبات الحدود التي يفرضها المتصفح بصدق. هذه نسخة تعليمية تعمل في بيئة Development فقط؛ لا تنشريها كما هي.
+
+## 1) متطلبات Windows
+
+1. ثبتي [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+2. ثبتي Node.js متوافقًا مع Angular 21: **Node 22.12 أو أحدث ضمن الإصدار 22**، أو Node 20.19+ أو 24.0+ (حسب جدول Angular). لا تستخدمي Node 22 أقدم من 22.12.
+3. تأكدي أن الطرفية تتعرف على الأوامر:
+
+```powershell
+dotnet --version
+node --version
+npm --version
+```
+
+4. افتحي المجلد `EduShield-Browser-Lab` في VS Code.
+
+## 2) تشغيل ASP.NET Core API (الطرفية الأولى)
+
+```powershell
+cd backend
+dotnet restore
+dotnet run --launch-profile EduShield.Api
+```
+
+يعمل على: **http://localhost:5078**.
+افتحي: `http://localhost:5078/api/system/status` وتوقعي JSON فيها `drm:false`.
+
+## 3) تشغيل Angular (الطرفية الثانية)
+
+```powershell
+cd frontend
+npm install
+npm start
+```
+
+افتحي: **http://localhost:4200**. تحتاج عملية تثبيت npm إلى اتصال بالإنترنت أول مرة.
+إذا تعارض المنفذ 4200 مع خدمة ثانية، أوقفي الخدمة قبل التشغيل لتبقى إعدادات الشرح متطابقة.
+
+### بيانات تسجيل الدخول التجريبي
+
+- اسم المستخدم: `student`
+- كلمة المرور: `LabOnly_2026!`
+
+**تحذير:** هذه بيانات عامة للتجربة فقط، موجودة داخل ملف `backend/appsettings.Development.json`. تسجيل الدخول مخصص لهذه النسخة المحلية وليس نظام هويات إنتاجيًا. تطبيق ASP.NET Core يتوقف عمدًا إذا شُغّل خارج وضع Development.
+
+## 4) التجارب الخمس (نفذيها بالترتيب)
+
+### التجربة A: منع الوصول بدون جلسة
+
+1. قبل الدخول افتحي في تبويب جديد `http://localhost:4200/api/lesson/demo-video`.
+2. المتوقع: استجابة HTTP **401 Unauthorized** (لا فيديو).
+3. سجلي الدخول من واجهة Angular ثم أعيدي زيارة رابط الفيديو.
+4. المتوقع: يتم تشغيل الفيديو أو تنزيله/عرضه بحسب المتصفح؛ لأن **المحتوى ليس مشفرًا بـDRM**.
+5. سجلي الخروج، ثم افتحي الرابط مرة أخرى. المتوقع 401.
+
+**ما تثبته:** Authorization على API. **ما لا تثبته:** منع تنزيل المحتوى من مستخدم مصرح له.
+
+### التجربة B: Screenshot
+
+1. افتحي الفيديو في Chrome أو Edge.
+2. استخدمي أداة Screenshot الخاصة بنظام التشغيل (Windows: `Win + Shift + S`، أو أداة macOS).
+3. افحصي الصورة: قد يظهر الفيديو أو جزء منه طبيعيًا.
+
+**النتيجة:** المتصفح لا يوفر JavaScript API عامًا وموثوقًا يخبر صفحتك عن جميع لقطات الشاشة. هذا الفشل متوقع، وليس خطأ برمجيًا في المشروع.
+
+### التجربة C: Screen Recording
+
+1. بعد الدخول، افتحي قسم «اختبارات الحماية الفعلية» واضغطي «تسجيل تجريبي».
+2. من نافذة إذن المشاركة اختاري **تبويب EduShield فقط**. لا تختاري كامل سطح المكتب أو تطبيقًا آخر.
+3. انتظري انتهاء 4 ثوانٍ؛ يمكن عرض المعاينة في نفس الصفحة.
+4. لا تُرسَل بيانات التسجيل إلى ASP.NET Core ولا تُحفَظ تلقائيًا كملف.
+5. يمكنك أيضًا اختبار أداة تسجيل مستقلة لديك: موقع الويب لا يستطيع عمومًا معرفة أنها تعمل.
+
+**ما تثبته:** قدرة المتصفح على إنشاء تسجيل باختيار المستخدم، لا إمكان منعه من موقع آخر. قد يرفض المتصفح التجربة أو لا يتيح اختيار التبويب؛ وهذا يعتمد على المتصفح.
+
+### التجربة D: فقدان تركيز النافذة
+
+1. فعّلي «إخفاء الفيديو عند مغادرة النافذة».
+2. انتقلي إلى نافذة أخرى ثم عودي.
+3. عند فقدان التركيز، تظهر طبقة سوداء في المشغل؛ وعند العودة تختفي.
+
+**ما تثبته:** كشف `blur` و`visibilitychange`. **ما لا تثبته:** اكتشاف التسجيل، وقد تكون الطبقة السوداء غير موجودة في اللقطة أو يمكن تجاوزها.
+
+### التجربة E: Extensions وEME
+
+1. افحصي المتصفح باستخدام زر «فحص المتصفح» لترَي نتيجة فحص واجهة EME المحتملة.
+2. تشغيل إضافة متصفح لا يعطي صفحة الويب طريقة مضمونة لحصر جميع الإضافات أو تعطيلها.
+3. نتيجة EME لا تعني أن ملف الاختبار مشفّر ولا أنها ستُظهر شاشة سوداء عند التصوير.
+
+## 5) هيكل الملفات
+
+```text
+EduShield-Browser-Lab/
+├── backend/
+│   ├── EduShield.Api.csproj
+│   ├── Program.cs                 # Authentication + CSRF + video endpoint + rate limit
+│   ├── appsettings.Development.json  # Demo password only
+│   ├── Properties/launchSettings.json
+│   └── Assets/demo.mp4            # Video stays outside wwwroot
+├── frontend/
+│   ├── package.json
+│   ├── angular.json
+│   ├── proxy.conf.json            # /api -> http://localhost:5078
+│   └── src/
+│       ├── main.ts
+│       ├── styles.css
+│       └── app/{app.ts,app.html,app.css}
+├── README_AR.md
+└── TEST_MATRIX.md
+```
+
+## 6) لماذا لا نستخدم حيل منع PrintScreen أو تعليق الموقع؟
+
+- منع F12 أو Right Click أو بعض اختصارات لوحة المفاتيح غير كافٍ، ويمكن تجاوزه ببساطة، كما يضر بوصولية الموقع.
+- يحق للصفحة مراقبة فقدان تركيز نافذتها، لكن ذلك لا يكشف جميع تسجيلات الشاشة.
+- صفحة عادية لا تحصل على قائمة Extensions المثبتة. واجهة `chrome.management` متاحة للإضافات المصرح لها وليس لمواقع الإنترنت.
+- DRM المطلوب للإنتاج يعني ترميز وتشفير ملفات الفيديو، ربط Media Player مع CDM وLicense Server، اختيار Widevine/PlayReady/FairPlay بناءً على المتصفح، والتحقق من حقوق التشغيل داخل Backend.
+- حتى DRM لا يضمن حجب كل أنواع تسجيل الشاشة على كل أجهزة الحاسوب.
+
+## 7) قبل تحويل النموذج لمنصة إنتاجية
+
+- استبدال تسجيل الدخول التجريبي بـ ASP.NET Core Identity أو مزود هوية مع MFA ودعم قفل الحساب.
+- إعداد HTTPS، تخزين مفاتيح Data Protection باستمرارية وأمان، صلاحيات Roles/Policies، وربط كل طالب باشتراك ودروس محددة.
+- استخدام مزود Multi-DRM مرخص وتخزين خاص وCDN مشفر؛ لا تكفي روابط MP4 مع Authentication.
+- تصميم سجل تدقيق وسياسة جلسات متزامنة، واختبار الحقوق عبر متصفحات وأنظمة تشغيل مختلفة.
+- إضافة اختبارات آلية للوصول غير المصرح به والتعامل مع أخطاء HTTP، وقياس سرعة التشغيل.
+- منع استخدام إعدادات المطور أو كلمة المرور المعلنة في الإنترنت العام.
+
+## 8) حدود التحقق في هذه الحزمة
+
+تم فحص JSON ووجود المصادر وترميز فيديو الاختبار محليًا. **لم يتم إجراء `dotnet build` أو `npm install && npm run build` في بيئة الإنشاء** لعدم توفر .NET SDK ولا وصول إلى npm registry هنا. يلزم تنفيذ هذين الاختبارين على جهازك كما في الخطوات أعلاه.
+
+## مراجع تقنية
+
+- [MDN Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API)
+- [MDN getDisplayMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia)
+- [Chrome Extension Management API](https://developer.chrome.com/docs/extensions/reference/api/management)
+- [Angular version compatibility](https://angular.dev/reference/versions)
+- [ASP.NET Core Anti-CSRF](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery?view=aspnetcore-10.0)
+- [W3C Encrypted Media Extensions](https://www.w3.org/TR/encrypted-media-1/)
