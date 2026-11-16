@@ -104,30 +104,6 @@ If you ever need to kill all running instances, double-click:
 ```cmd
 stop-all.bat
 ```
-
 ---
-
-## 📖 دليل الاستخدام بالعربية
-
-### نبذة عن المشروع
-**EduShield Protected Desktop Player** هو مشغل تعليمي مخصص لسطح المكتب مبني بتقنيات حديثة (Electron 33 + Angular 21 + ASP.NET Core 10) لحل أكبر معضلة تواجه المنصات التعليمية: **سرقة الفيديوهات عبر برامج تسجيل الشاشة أو إضافات المتصفح**.
-
-### آليات الحماية المطبقة:
-1. **الحماية العتادية الشاملة (`SetWindowDisplayAffinity`):**  
-   يجبر محرك ويندوز (DWM) على جعل نافذة البرنامج سوداء تماماً 100% في أي تسجيل فيديو (OBS, Snipping Tool, Win+Shift+S, Win+Shift+R, Camtasia) أو مشاركة شاشة (Zoom, Teams, Discord)، بينما يشاهد الطالب درسه على الشاشة بشكل طبيعي.
-2. **انعدام إضافات المتصفح (Zero Extensions):**  
-   بيئة إلكترون المغلقة تمنع تثبيت أو حقن أي إضافات تنزيل (مثل IDM أو Video DownloadHelper) على الإطلاق.
-3. **علامة مائية ديناميكية عائمة (Dynamic Watermark):**  
-   علامة مائية تتحرك عشوائياً فوق الفيديو تحتوي على معرف الطالب والتوقيت والـ IP للردع في حال تم تصوير الشاشة بجوال خارجي.
-4. **تطهير الحافظة (Clipboard Scrubber):**  
-   عند الضغط على أزرار التصوير، يتم مسح الحافظة فوراً واستبدالها بنص تنبيه أمني وقانوني.
-
-### طريقة التشغيل:
-اضغط دبل كليك على الملف:
-👉 **`start-desktop.bat`**  
-وسيقوم بتشغيل كل شيء تلقائياً وعرض الفيديو المحمي فوراً.
-
----
-
 ## 📄 License
 This project is for educational and platform-protection demonstration purposes.
