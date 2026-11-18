@@ -61,6 +61,11 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly showPassword = signal(false);
   readonly isDesktopApp = signal(typeof window !== 'undefined' && !!(window as unknown as { electronShield?: { isElectron?: boolean } }).electronShield?.isElectron);
 
+  // Website to Desktop auto-launch state
+  readonly autoLaunchDesktop = signal(true);
+  readonly launchingDesktop = signal(false);
+  readonly desktopLaunchMessage = signal<string | null>(null);
+
   // Dynamic floating watermark positions
   readonly watermarkX = signal(14);
   readonly watermarkY = signal(18);
@@ -552,6 +557,35 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
+  fillDemoCredentials(): void {
+    this.username = this.demoUsername;
+    this.password = this.demoPassword;
+    this.note.set('تم ملء بيانات الحساب التجريبي بنجاح. اضغط الآن على زر الدخول.');
+  }
+
+  async launchDesktopPlayer(): Promise<void> {
+    if (this.launchingDesktop()) return;
+    this.launchingDesktop.set(true);
+    this.desktopLaunchMessage.set('جاري إطلاق مشغل سطح المكتب المحمي (EduShield Player)...');
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ launched: boolean; message: string }>('/api/player/launch', {})
+      );
+      this.desktopLaunchMessage.set('✅ تم إطلاق مشغل سطح المكتب بنجاح! راجع نافذة المشغل المحمي على سطح المكتب.');
+      this.note.set('تم إطلاق مشغل سطح المكتب المحمي بنجاح.');
+    } catch (err: any) {
+      // Fallback: try opening via registered custom deep link protocol edushield://open
+      try {
+        window.location.href = 'edushield://open';
+        this.desktopLaunchMessage.set('تم إرسال أمر التشغيل عبر بروتوكول edushield://. إذا لم تظهر النافذة، يرجى تشغيل start-desktop.bat.');
+      } catch {
+        this.desktopLaunchMessage.set('تعذر فتح المشغل تلقائياً. يمكنك تشغيله يدوياً عبر ملف start-desktop.bat.');
+      }
+    } finally {
+      setTimeout(() => this.launchingDesktop.set(false), 4000);
+    }
+  }
+
   async login(): Promise<void> {
     if (this.busy()) return;
     this.busy.set(true);
@@ -569,6 +603,13 @@ export class AppComponent implements OnInit, OnDestroy {
       }));
       this.currentUser.set(response.username);
       this.note.set('تم تسجيل الدخول بنجاح! المحاضرة والمشغل جاهزان للعرض.');
+
+      // When logging in from regular Web Browser, auto launch the protected Desktop Player
+      if (!this.isDesktopApp() && this.autoLaunchDesktop()) {
+        setTimeout(() => {
+          void this.launchDesktopPlayer();
+        }, 300);
+      }
     } catch (error: any) {
       console.error('[EduShield Login Error]', JSON.stringify({
         status: error?.status,

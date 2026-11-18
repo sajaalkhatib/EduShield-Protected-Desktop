@@ -69,15 +69,28 @@ EduShield-Protected-Desktop/
 1. **[.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)** or newer.
 2. **[Node.js](https://nodejs.org/)** (v20.x, v22.x, or v24.x).
 
-### 🚀 1-Click Launch (Recommended)
-Simply double-click:
+### 🌐 Option A: Website Portal with Auto-Launch (Recommended Web Workflow)
+Run:
+```cmd
+start-website.bat
+```
+*(Or simply `start-all.bat`)*
+- Automatically starts the backend API (port 5078) and frontend server (port 4200).
+- Opens the **EduShield Academy Website** in your default web browser (`http://localhost:4200`).
+- The student signs in with:
+  - **Username:** `student`
+  - **Password:** `LabOnly_2026!`
+- **Upon logging in:** The website automatically launches the **EduShield Protected Desktop Player** on Windows with hardware-enforced video security!
+
+### 🖥️ Option B: Direct Desktop Player (Standalone Launcher)
+To open the protected player directly without opening a web browser:
 ```cmd
 start-desktop.bat
 ```
 This launcher automatically:
 1. Terminates any lingering processes and frees port `5078`.
-2. Compiles and launches the protected ASP.NET Core API.
-3. Launches the hardware-protected Desktop Player.
+2. Verifies and launches the protected ASP.NET Core API.
+3. Launches the hardware-protected Desktop Player with full DWM `WDA_MONITOR` protection.
 4. Automatically signs in with the demo account and streams the lesson!
 
 ### 🔑 Demo Credentials

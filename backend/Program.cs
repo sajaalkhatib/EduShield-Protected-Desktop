@@ -13,13 +13,36 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     EnvironmentName = Environments.Development
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.SetIsOriginAllowed(origin =>
+        {
+            if (string.IsNullOrEmpty(origin)) return false;
+            try
+            {
+                var uri = new Uri(origin);
+                return uri.Host == "localhost" || uri.Host == "127.0.0.1";
+            }
+            catch
+            {
+                return false;
+            }
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.Cookie.Name = "EduShield.Lab.Session";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTPS in production.
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
@@ -40,7 +63,7 @@ builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-XSRF-TOKEN";
     options.Cookie.Name = "EduShield.Lab.Antiforgery";
-    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.HttpOnly = true;
 });
@@ -49,7 +72,7 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddFixedWindowLimiter("demo-login", limiter =>
     {
-        limiter.PermitLimit = 8;
+        limiter.PermitLimit = 30;
         limiter.Window = TimeSpan.FromMinutes(1);
         limiter.QueueLimit = 0;
         limiter.AutoReplenishment = true;
@@ -57,6 +80,8 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors();
 
 app.Use(async (context, next) =>
 {
@@ -116,13 +141,13 @@ app.MapPost("/api/auth/login", async (
         CookieAuthenticationDefaults.AuthenticationScheme,
         new ClaimsPrincipal(identity));
     return Results.Ok(new { username = "student" });
-}).RequireRateLimiting("demo-login");
+}).DisableAntiforgery().RequireRateLimiting("demo-login");
 
 app.MapPost("/api/auth/logout", async (HttpContext context) =>
 {
     await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Ok(new { loggedOut = true });
-}).RequireAuthorization();
+}).DisableAntiforgery().RequireAuthorization();
 
 // This route protects the file from unauthenticated requests. It is NOT DRM.
 // Authenticated users / download extensions can still extract the MP4 bytes if not using DRM.
@@ -144,6 +169,53 @@ app.MapGet("/api/lesson/demo-video", (IWebHostEnvironment environment, HttpRespo
     }
     return Results.File(path, contentType: "video/mp4", enableRangeProcessing: true);
 }).RequireAuthorization();
+
+app.MapPost("/api/player/launch", (IWebHostEnvironment environment) =>
+{
+    try
+    {
+        var searchDirs = new[]
+        {
+            environment.ContentRootPath,
+            Path.GetFullPath(Path.Combine(environment.ContentRootPath, "..")),
+            AppContext.BaseDirectory,
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..")),
+            Directory.GetCurrentDirectory()
+        };
+
+        string? batPath = null;
+        foreach (var dir in searchDirs)
+        {
+            var candidate = Path.Combine(dir, "start-desktop.bat");
+            if (File.Exists(candidate))
+            {
+                batPath = candidate;
+                break;
+            }
+        }
+
+        if (batPath == null)
+        {
+            return Results.NotFound(new { message = "start-desktop.bat not found." });
+        }
+
+        var processInfo = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "cmd.exe",
+            Arguments = $"/c \"{batPath}\"",
+            WorkingDirectory = Path.GetDirectoryName(batPath),
+            UseShellExecute = true,
+            CreateNoWindow = true
+        };
+        System.Diagnostics.Process.Start(processInfo);
+
+        return Results.Ok(new { launched = true, message = "Desktop player launch requested." });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Failed to launch Desktop Player: {ex.Message}", statusCode: 500);
+    }
+}).DisableAntiforgery();
 
 app.MapGet("/api/system/status", () => Results.Ok(new
 {

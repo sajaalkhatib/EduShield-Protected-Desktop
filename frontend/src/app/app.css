@@ -203,3 +203,454 @@
   from { opacity: 0.3; }
   to { opacity: 1; }
 }
+
+/* ==========================================================================
+   ACADEMY WEB PORTAL STYLES (When running in Web Browser)
+   ========================================================================== */
+.web-portal {
+  min-height: 100vh;
+  background: #080f1a;
+  color: #e2e8f0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  direction: rtl;
+}
+
+.web-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 36px;
+  background: #0d1726;
+  border-bottom: 1px solid #1e2c3e;
+}
+
+.web-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.web-brand-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: #03211e;
+  font-weight: bold;
+}
+
+.web-brand-info strong {
+  display: block;
+  font-size: 18px;
+  color: #f8fafc;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.web-brand-info small {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.web-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.web-nav-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.web-nav-link:hover, .web-nav-link.active {
+  color: #38bdf8;
+}
+
+.web-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #142132;
+  border: 1px solid #23374d;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
+.web-logout-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f87171;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.web-logout-btn:hover {
+  background: #334155;
+}
+
+.web-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 20px 60px;
+}
+
+/* Hero Section */
+.web-hero {
+  text-align: center;
+  padding: 30px 20px;
+  margin-bottom: 30px;
+}
+
+.web-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.web-hero h1 {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.web-hero p {
+  color: #94a3b8;
+  font-size: 15px;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Login Page Styles */
+.web-login-box {
+  max-width: 460px;
+  margin: 0 auto;
+  background: #0f1c2d;
+  border: 1px solid #1e334a;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.web-login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.web-login-header h2 {
+  font-size: 20px;
+  color: #f1f5f9;
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.web-login-header p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+.web-form-group {
+  margin-bottom: 18px;
+}
+
+.web-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.web-input-wrap {
+  position: relative;
+}
+
+.web-input {
+  width: 100%;
+  height: 44px;
+  background: #091320;
+  border: 1px solid #1e3146;
+  border-radius: 8px;
+  padding: 0 14px;
+  color: #f8fafc;
+  font-size: 14px;
+  direction: ltr;
+  text-align: left;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.web-input:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+}
+
+.web-btn-eye {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.web-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 20px;
+  font-size: 12px;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.web-checkbox-wrap input {
+  cursor: pointer;
+}
+
+.web-btn-submit {
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+  color: #041824;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.web-btn-submit:hover:not(:disabled) {
+  opacity: 0.93;
+  transform: translateY(-1px);
+}
+
+.web-btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.web-quick-fill {
+  margin-top: 16px;
+  width: 100%;
+  background: #142436;
+  border: 1px dashed #24415e;
+  color: #38bdf8;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.web-quick-fill:hover {
+  background: #19314a;
+}
+
+.web-login-info {
+  margin-top: 20px;
+  background: #0a1422;
+  border-right: 3px solid #06b6d4;
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #94a3b8;
+}
+
+/* Logged-In Student Course Portal */
+.web-course-card {
+  background: #0f1c2d;
+  border: 1px solid #1e334a;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.web-course-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.web-course-badge {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.web-course-header h2 {
+  font-size: 20px;
+  color: #f8fafc;
+  margin: 6px 0;
+}
+
+.web-course-meta {
+  display: flex;
+  gap: 16px;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* Desktop Launcher Hero Card */
+.web-launcher-card {
+  background: radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.12), transparent 45%), #0f1e31;
+  border: 2px solid #0284c7;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(2, 132, 199, 0.15);
+}
+
+.web-launcher-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #0284c7, #06b6d4);
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  margin: 0 auto 16px;
+  color: #031726;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+}
+
+.web-launcher-card h3 {
+  font-size: 22px;
+  color: #f8fafc;
+  margin: 0 0 10px;
+  font-weight: 800;
+}
+
+.web-launcher-card p {
+  color: #94a3b8;
+  font-size: 13px;
+  max-width: 620px;
+  margin: 0 auto 24px;
+  line-height: 1.8;
+}
+
+.btn-launch-desktop {
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  color: #03201d;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 14px 36px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+}
+
+.btn-launch-desktop:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 26px rgba(16, 185, 129, 0.5);
+}
+
+.btn-launch-desktop:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.web-launch-feedback {
+  margin-top: 18px;
+  background: #091624;
+  border: 1px solid #0284c7;
+  color: #38bdf8;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: inline-block;
+}
+
+.web-launch-helper {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.web-course-syllabus {
+  margin-top: 24px;
+  background: #0a1422;
+  border: 1px solid #1a2b3f;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.web-course-syllabus h4 {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 12px;
+}
+
+.syllabus-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #152334;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.syllabus-item:last-child {
+  border-bottom: none;
+}
+
+.syllabus-num {
+  width: 24px;
+  height: 24px;
+  background: #1e334a;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #38bdf8;
+  font-weight: bold;
+}

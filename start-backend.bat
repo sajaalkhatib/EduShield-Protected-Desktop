@@ -11,7 +11,7 @@ echo.
 
 echo [*] Freeing port 5078 and stopping previous instances...
 taskkill /F /IM EduShield.Api.exe >nul 2>&1
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5078" ^| findstr "LISTENING"') do taskkill /f /pid %%a >nul 2>&1
+powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 5078 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }" >nul 2>&1
 
 echo [*] Compiling latest backend code...
 cd /d "%~dp0backend"

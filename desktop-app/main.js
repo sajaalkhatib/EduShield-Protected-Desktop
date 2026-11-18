@@ -4,6 +4,28 @@ const http = require('http');
 const fs = require('fs');
 const { exec } = require('child_process');
 
+// Register custom deep link protocol: edushield://open
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('edushield', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('edushield');
+}
+
+// Single instance lock: Focus window if opened again from website
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+}
+
 // Dedicated screen recorders to detect and alert
 const RECORDER_PROCESSES = [
   'obs64', 'obs32', 'bdcam', 'camtasia', 'CamRecorder',
